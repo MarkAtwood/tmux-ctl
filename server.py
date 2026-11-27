@@ -5,7 +5,8 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-from typing import Optional
+from collections.abc import AsyncIterator
+from typing import Optional, TypedDict
 
 import libtmux
 import uvicorn
@@ -14,26 +15,52 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 
+class SessionDict(TypedDict):
+    name: str
+    id: str
+    created: int
+    attached: bool
+    windows: int
+
+
+class WindowDict(TypedDict):
+    index: int
+    id: str
+    name: str
+    active: bool
+    panes: int
+
+
+class PaneDict(TypedDict):
+    index: int
+    id: str
+    active: bool
+    pid: int
+    command: str
+    width: int
+    height: int
+
+
 app = FastAPI(title="tmux-http", description="REST API over tmux")
 server = libtmux.Server()
 
 
-def _bool(v) -> bool:
+def _bool(v: object) -> bool:
     if isinstance(v, bool):
         return v
     return str(v) == "1"
 
 
-def _int(v, default: int = 0) -> int:
+def _int(v: object, default: int = 0) -> int:
     if v is None:
         return default
     try:
-        return int(v)
+        return int(v)  # type: ignore[arg-type]
     except (TypeError, ValueError):
         return default
 
 
-def session_dict(s) -> dict:
+def session_dict(s: libtmux.Session) -> SessionDict:
     return {
         "name": s.session_name,
         "id": s.session_id,
@@ -43,7 +70,7 @@ def session_dict(s) -> dict:
     }
 
 
-def window_dict(w) -> dict:
+def window_dict(w: libtmux.Window) -> WindowDict:
     return {
         "index": _int(w.window_index),
         "id": w.window_id,
@@ -53,7 +80,7 @@ def window_dict(w) -> dict:
     }
 
 
-def pane_dict(p) -> dict:
+def pane_dict(p: libtmux.Pane) -> PaneDict:
     return {
         "index": _int(p.pane_index),
         "id": p.pane_id,
@@ -65,14 +92,14 @@ def pane_dict(p) -> dict:
     }
 
 
-def get_session(name: str):
+def get_session(name: str) -> libtmux.Session:
     matches = server.sessions.filter(session_name=name)
     if not matches:
         raise HTTPException(404, f"session {name!r} not found")
     return matches[0]
 
 
-def get_window(session_name: str, idx: int):
+def get_window(session_name: str, idx: int) -> libtmux.Window:
     sess = get_session(session_name)
     wins = sess.windows.filter(window_index=str(idx))
     if not wins:
@@ -80,13 +107,14 @@ def get_window(session_name: str, idx: int):
     return wins[0]
 
 
-def resolve_pane(target: str):
+def resolve_pane(target: str) -> libtmux.Pane:
     """Resolve `%id` or `session:window.pane` to a libtmux Pane."""
     if target.startswith("%"):
         matches = server.panes.filter(pane_id=target)
         if not matches:
             raise HTTPException(404, f"pane {target!r} not found")
         return matches[0]
+    # ponytail: format is session:window.pane, e.g. "main:0.1"
     try:
         if "." in target:
             sw, p_idx = target.rsplit(".", 1)
@@ -135,7 +163,7 @@ class ResizePane(BaseModel):
 
 
 @app.get("/")
-def root():
+def root() -> dict[str, object]:
     return {
         "name": "tmux-http",
         "endpoints": [
@@ -159,78 +187,81 @@ def root():
 
 
 @app.get("/sessions")
-def sessions_list():
+def sessions_list() -> list[SessionDict]:
     return [session_dict(s) for s in server.sessions]
 
 
 @app.post("/sessions", status_code=201)
-def sessions_create(body: CreateSession):
+def sessions_create(body: CreateSession) -> SessionDict:
     if server.sessions.filter(session_name=body.name):
         raise HTTPException(409, f"session {body.name!r} exists")
-    kwargs: dict = {"session_name": body.name}
+    kwargs: dict[str, object] = {"session_name": body.name}
     if body.command:
         kwargs["window_command"] = body.command
-    if body.width:
+    if body.width is not None:
         kwargs["x"] = body.width
-    if body.height:
+    if body.height is not None:
         kwargs["y"] = body.height
     s = server.new_session(**kwargs)
     return session_dict(s)
 
 
 @app.get("/sessions/{name}")
-def session_get(name: str):
+def session_get(name: str) -> dict[str, object]:
     s = get_session(name)
     return {**session_dict(s), "windows": [window_dict(w) for w in s.windows]}
 
 
 @app.delete("/sessions/{name}")
-def session_delete(name: str):
+def session_delete(name: str) -> dict[str, bool]:
     s = get_session(name)
     s.kill()
     return {"ok": True}
 
 
 @app.get("/sessions/{name}/windows")
-def session_windows(name: str):
+def session_windows(name: str) -> list[WindowDict]:
     s = get_session(name)
     return [window_dict(w) for w in s.windows]
 
 
 @app.get("/sessions/{name}/windows/{idx}/panes")
-def window_panes(name: str, idx: int):
+def window_panes(name: str, idx: int) -> list[PaneDict]:
     w = get_window(name, idx)
     return [pane_dict(p) for p in w.panes]
 
 
 @app.post("/sessions/{name}/windows", status_code=201)
-def window_create(name: str, body: CreateWindow):
+def window_create(name: str, body: CreateWindow) -> WindowDict:
     sess = get_session(name)
-    kwargs: dict = {}
+    kwargs: dict[str, object] = {}
     if body.name:
         kwargs["window_name"] = body.name
     if body.command:
-        kwargs["window_shell"] = body.command
+        kwargs["start_directory"] = None
+        kwargs["shell"] = body.command
     w = sess.new_window(**kwargs)
     return window_dict(w)
 
 
 @app.delete("/sessions/{name}/windows/{idx}")
-def window_delete(name: str, idx: int):
+def window_delete(name: str, idx: int) -> dict[str, bool]:
     w = get_window(name, idx)
     w.kill()
     return {"ok": True}
 
 
 @app.post("/sessions/{name}/windows/{idx}/select")
-def window_select(name: str, idx: int):
+def window_select(name: str, idx: int) -> dict[str, bool]:
     w = get_window(name, idx)
     w.select()
     return {"ok": True}
 
 
 @app.get("/panes/{target}/output")
-def pane_output(target: str, lines: int = 100):
+def pane_output(target: str, lines: int = 100) -> dict[str, str]:
+    if lines < 1:
+        raise HTTPException(400, "lines must be positive")
     pane = resolve_pane(target)
     out = pane.capture_pane(start=-lines)
     if isinstance(out, list):
@@ -239,50 +270,57 @@ def pane_output(target: str, lines: int = 100):
 
 
 @app.post("/panes/{target}/input")
-def pane_input(target: str, body: SendInput):
+def pane_input(target: str, body: SendInput) -> dict[str, bool]:
     pane = resolve_pane(target)
     pane.send_keys(body.keys, literal=body.literal, enter=body.enter)
     return {"ok": True}
 
 
 @app.post("/panes/{target}/split", status_code=201)
-def pane_split(target: str, body: SplitPane):
+def pane_split(target: str, body: SplitPane) -> PaneDict:
     pane = resolve_pane(target)
-    kwargs: dict = {"vertical": body.vertical}
+    kwargs: dict[str, object] = {"vertical": body.vertical}
     if body.command:
         kwargs["shell"] = body.command
-    if body.size:
+    if body.size is not None:
         kwargs["size"] = body.size
     new_pane = pane.split(**kwargs)
     return pane_dict(new_pane)
 
 
 @app.delete("/panes/{target}")
-def pane_delete(target: str):
+def pane_delete(target: str) -> dict[str, bool]:
     pane = resolve_pane(target)
     pane.kill()
     return {"ok": True}
 
 
 @app.post("/panes/{target}/resize")
-def pane_resize(target: str, body: ResizePane):
+def pane_resize(target: str, body: ResizePane) -> PaneDict:
     pane = resolve_pane(target)
-    if body.width:
-        pane.resize(width=body.width)
-    if body.height:
-        pane.resize(height=body.height)
+    kwargs: dict[str, int] = {}
+    if body.width is not None:
+        kwargs["width"] = body.width
+    if body.height is not None:
+        kwargs["height"] = body.height
+    if kwargs:
+        pane.resize(**kwargs)
     return pane_dict(pane)
 
 
-async def _stream_pane_output(target: str, poll_ms: int = 100):
+async def _stream_pane_output(pane: libtmux.Pane, poll_ms: int = 100) -> AsyncIterator[str]:
     """Generator that yields SSE events when pane output changes."""
-    pane = resolve_pane(target)
     last_output = ""
     while True:
-        out = pane.capture_pane()
+        try:
+            out = await asyncio.to_thread(pane.capture_pane)
+        except Exception:
+            yield f"data: {json.dumps({'type': 'closed'})}\n\n"
+            return
         if isinstance(out, list):
             out = "\n".join(out)
         if out != last_output:
+            # ponytail: if new output is an extension, send only the delta
             new_content = out[len(last_output):] if out.startswith(last_output) else out
             event = {"type": "output", "content": new_content}
             yield f"data: {json.dumps(event)}\n\n"
@@ -291,16 +329,16 @@ async def _stream_pane_output(target: str, poll_ms: int = 100):
 
 
 @app.get("/panes/{target}/stream")
-async def pane_stream(target: str, poll_ms: int = 100):
-    resolve_pane(target)
+async def pane_stream(target: str, poll_ms: int = 100) -> StreamingResponse:
+    pane = resolve_pane(target)
     return StreamingResponse(
-        _stream_pane_output(target, poll_ms),
+        _stream_pane_output(pane, poll_ms),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8765)
