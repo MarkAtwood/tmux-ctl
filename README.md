@@ -1,38 +1,40 @@
-# tmux-ctl
+# tmux-api
 
 HTTP API for tmux. Control sessions, windows, panes. Read terminal state.
 
 ## Install
 
 ```sh
-# PyPI
 pip install tmux-api
-
-# pipx (isolated)
-pipx install tmux-api
-
-# Homebrew
-brew install MarkAtwood/tap/tmux-api
-
-# Nix
-nix run github:MarkAtwood/tmux-ctl
 ```
 
-Requires tmux to be installed.
+Or isolated:
+
+```sh
+pipx install tmux-api
+```
+
+Or via Homebrew:
+
+```sh
+brew install MarkAtwood/tap/tmux-api
+```
+
+Requires tmux.
 
 ## Run
 
 ```sh
 tmux-api                    # 127.0.0.1:8765
 tmux-api --port 9000        # custom port
-tmux-api --host 0.0.0.0     # listen on all interfaces
+tmux-api --host 0.0.0.0     # all interfaces
 ```
 
 Connects to your default tmux socket.
 
 ## API
 
-`/docs` for Swagger UI. `/openapi.json` for spec.
+Swagger UI at `/docs`. OpenAPI spec at `/openapi.json`.
 
 Targets: windows take `@id` or `session:index`, panes take `%id` or `session:window.pane`.
 
@@ -133,6 +135,17 @@ curl -X POST localhost:8765/panes/work:0.0/wait -H 'content-type: application/js
 # kill session
 curl -X DELETE localhost:8765/sessions/work
 ```
+
+## Development
+
+```sh
+git clone https://github.com/MarkAtwood/tmux-ctl
+cd tmux-ctl
+pip install -e .
+tmux-api
+```
+
+Nix users: `nix develop` for a shell, `nix run` to run directly.
 
 ## License
 
