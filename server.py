@@ -34,17 +34,23 @@ def _int(v, default: int = 0) -> int:
 
 
 def session_dict(s) -> dict:
+    name = s.session_name
     return {
-        "name": s.session_name,
+        "@type": "Session",
+        "@id": f"/sessions/{name}",
+        "name": name,
         "id": s.session_id,
         "created": _int(s.session_created),
         "attached": _bool(s.session_attached),
-        "windows": _int(getattr(s, "session_windows", None)),
+        "window_count": _int(getattr(s, "session_windows", None)),
         "grouped": _bool(getattr(s, "session_grouped", False)),
         "group": getattr(s, "session_group", None),
         "activity": _int(getattr(s, "session_activity", None)),
         "last_attached": _int(getattr(s, "session_last_attached", None)),
         "path": getattr(s, "session_path", None),
+        "windows": f"/sessions/{name}/windows",
+        "options": f"/sessions/{name}/options",
+        "env": f"/sessions/{name}/env",
     }
 
 
@@ -58,24 +64,32 @@ def _parse_layout(layout_str):
 
 
 def window_dict(w) -> dict:
+    wid = w.window_id
     return {
+        "@type": "Window",
+        "@id": f"/windows/{wid}",
         "index": _int(w.window_index),
-        "id": w.window_id,
+        "id": wid,
         "name": w.window_name,
         "active": _bool(w.window_active),
-        "panes": _int(w.window_panes),
+        "pane_count": _int(w.window_panes),
         "layout": _parse_layout(getattr(w, "window_layout", None)),
         "width": _int(getattr(w, "window_width", None)),
         "height": _int(getattr(w, "window_height", None)),
         "flags": getattr(w, "window_flags", None),
         "activity": _int(getattr(w, "window_activity", None)),
+        "options": f"/windows/{wid}/options",
+        "split": f"/windows/{wid}/split",
     }
 
 
 def pane_dict(p) -> dict:
+    pid = p.pane_id
     return {
+        "@type": "Pane",
+        "@id": f"/panes/{pid}",
         "index": _int(p.pane_index),
-        "id": p.pane_id,
+        "id": pid,
         "active": _bool(p.pane_active),
         "pid": _int(p.pane_pid),
         "command": p.pane_current_command,
@@ -94,6 +108,11 @@ def pane_dict(p) -> dict:
         "alternate_on": _bool(getattr(p, "alternate_on", False)),
         "cursor_visible": _bool(getattr(p, "cursor_flag", True)),
         "unseen_changes": _bool(getattr(p, "pane_unseen_changes", False)),
+        "output": f"/panes/{pid}/output",
+        "input": f"/panes/{pid}/input",
+        "screen": f"/panes/{pid}/screen",
+        "terminal": f"/panes/{pid}/terminal",
+        "options": f"/panes/{pid}/options",
     }
 
 
@@ -265,7 +284,18 @@ def client_dict(c) -> dict:
 
 @app.get("/")
 def root():
-    return {"name": "tmux-ctl", "docs": "/docs", "openapi": "/openapi.json"}
+    return {
+        "@type": "ServiceRoot",
+        "@id": "/",
+        "name": "tmux-ctl",
+        "sessions": "/sessions",
+        "windows": "/windows",
+        "panes": "/panes",
+        "buffers": "/buffers",
+        "clients": "/clients",
+        "docs": "/docs",
+        "openapi": "/openapi.json",
+    }
 
 
 # Buffers
@@ -784,6 +814,60 @@ def pane_lines(target: str, start: int = 0, end: int = -1):
                 "text": text,
             })
     return {"lines": result}
+
+
+@app.get("/panes/{target}/commands")
+def pane_commands(target: str, limit: int = 50):
+    """Get shell commands with their output, parsed from OSC 133 markers."""
+    pane = resolve_pane(target)
+    out = server.cmd("capture-pane", "-t", pane.pane_id, "-p", "-F", "-L", "-S", "-").stdout
+    if isinstance(out, list):
+        lines = out
+    else:
+        lines = out.split("\n")
+
+    commands = []
+    current_cmd = None
+
+    for line in lines:
+        m = re.match(r"(\d+) ([-DOPXHW]+) (.*)", line)
+        if not m:
+            continue
+        lineno, flags, text = m.groups()
+        lineno = int(lineno)
+
+        if "P" in flags:
+            # prompt line - start of new command
+            if current_cmd is not None:
+                commands.append(current_cmd)
+            current_cmd = {
+                "prompt_line": lineno,
+                "prompt": text,
+                "command": None,  # extracted from prompt text
+                "output_start": None,
+                "output_end": None,
+                "output": [],
+            }
+            # try to extract command from prompt (after $ or > or #)
+            cmd_m = re.search(r"[$#>]\s*(.+)$", text)
+            if cmd_m:
+                current_cmd["command"] = cmd_m.group(1).strip()
+        elif "O" in flags and current_cmd is not None:
+            # output line
+            if current_cmd["output_start"] is None:
+                current_cmd["output_start"] = lineno
+            current_cmd["output_end"] = lineno
+            current_cmd["output"].append(text)
+
+    if current_cmd is not None:
+        commands.append(current_cmd)
+
+    # return most recent N commands
+    return {
+        "@type": "CommandHistory",
+        "@id": f"/panes/{pane.pane_id}/commands",
+        "commands": commands[-limit:] if limit else commands,
+    }
 
 
 # Mode-aware terminal access
