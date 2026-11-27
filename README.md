@@ -49,6 +49,9 @@ Endpoint summary:
 | GET | `/sessions/{name}/windows/{idx}/panes` | List panes in a window |
 | GET | `/panes/{target}/output?lines=N` | Capture last N lines from a pane |
 | POST | `/panes/{target}/input` | Send keys — `{keys, literal?, enter?}` |
+| POST | `/panes/{target}/split` | Split pane — `{vertical?, command?, size?}` |
+| DELETE | `/panes/{target}` | Kill a pane |
+| POST | `/panes/{target}/resize` | Resize pane — `{width?, height?}` |
 
 Pane targets accept either `%id` (e.g. `%14`) or `session:window.pane`
 (e.g. `main:0.1`).

@@ -120,6 +120,17 @@ class SendInput(BaseModel):
     enter: bool = False
 
 
+class SplitPane(BaseModel):
+    vertical: bool = False
+    command: Optional[str] = None
+    size: Optional[int] = None
+
+
+class ResizePane(BaseModel):
+    width: Optional[int] = None
+    height: Optional[int] = None
+
+
 @app.get("/")
 def root():
     return {
@@ -136,6 +147,9 @@ def root():
             "GET    /sessions/{name}/windows/{idx}/panes",
             "GET    /panes/{target}/output?lines=N",
             "POST   /panes/{target}/input   {keys, literal?, enter?}",
+            "POST   /panes/{target}/split   {vertical?, command?, size?}",
+            "DELETE /panes/{target}",
+            "POST   /panes/{target}/resize  {width?, height?}",
         ],
     }
 
@@ -225,6 +239,35 @@ def pane_input(target: str, body: SendInput):
     pane = resolve_pane(target)
     pane.send_keys(body.keys, literal=body.literal, enter=body.enter)
     return {"ok": True}
+
+
+@app.post("/panes/{target}/split", status_code=201)
+def pane_split(target: str, body: SplitPane):
+    pane = resolve_pane(target)
+    kwargs: dict = {"vertical": body.vertical}
+    if body.command:
+        kwargs["shell"] = body.command
+    if body.size:
+        kwargs["size"] = body.size
+    new_pane = pane.split(**kwargs)
+    return pane_dict(new_pane)
+
+
+@app.delete("/panes/{target}")
+def pane_delete(target: str):
+    pane = resolve_pane(target)
+    pane.kill()
+    return {"ok": True}
+
+
+@app.post("/panes/{target}/resize")
+def pane_resize(target: str, body: ResizePane):
+    pane = resolve_pane(target)
+    if body.width:
+        pane.resize(width=body.width)
+    if body.height:
+        pane.resize(height=body.height)
+    return pane_dict(pane)
 
 
 def main():
