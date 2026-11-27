@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.6",
+  "title": "resolve_pane target parsing is dense without explanation",
+  "description": "Lines 91-95: The parsing of `session:window.pane` with the implicit default of pane 0 when no dot is present is packed into a few lines. The `.rsplit('.', 1)` and `.split(':', 1)` sequence is correct but requires careful reading. A one-line comment like '# default to pane 0 if no .pane suffix' would help.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:05.307834Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.155566Z",
+  "closed_at": "2026-11-27T03:31:42.155566Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "readability",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.6",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:05.327914Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

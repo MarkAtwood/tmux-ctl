@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.14",
+  "title": "SSE stream raises unhandled exception if pane is killed mid-stream",
+  "description": "Lines 277-290: `_stream_pane_output` resolves the pane once (line 279) then loops with `while True`. If the pane is killed during streaming, `pane.capture_pane()` (line 282) raises an exception that propagates up unhandled. Result: client sees an abrupt connection drop instead of a clean SSE termination event. The generator should catch pane-not-found and yield a final `{\"type\": \"closed\"}` event before returning.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:19.930919Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.065976Z",
+  "closed_at": "2026-11-27T03:31:42.065976Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "correctness",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.14",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:19.947456Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

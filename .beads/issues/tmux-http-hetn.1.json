@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.1",
+  "title": "pane_resize makes two tmux calls when one would suffice",
+  "description": "Lines 270-273: When both width and height are provided, the endpoint makes two separate pane.resize() calls. libtmux's resize() accepts both parameters simultaneously, so this could be a single call. For typical use this is negligible, but it's an easy fix.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:13:57.093335Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.118172Z",
+  "closed_at": "2026-11-27T03:31:42.118172Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "efficiency",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.1",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:13:57.11435Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

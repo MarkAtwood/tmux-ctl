@@ -1,0 +1,27 @@
+{
+  "id": "tmux-http-hetn.9",
+  "title": "GOOD: resolve_pane accepts both %id and path formats",
+  "description": "Lines 83-105: Supporting both native tmux pane IDs (%1, %2) and the structured session:window.pane path gives users flexibility. Scripts can use stable IDs while interactive use can use human-readable paths. Worth defending if someone suggests consolidating to one format.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:09.905464Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:46.521143Z",
+  "closed_at": "2026-11-27T03:31:46.521143Z",
+  "close_reason": "Acknowledged as good patterns",
+  "labels": [
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.9",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:09.920083Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

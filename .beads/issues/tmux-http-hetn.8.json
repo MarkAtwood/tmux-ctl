@@ -1,0 +1,27 @@
+{
+  "id": "tmux-http-hetn.8",
+  "title": "GOOD: _bool/_int helpers for libtmux string quirks",
+  "description": "Lines 21-33: The _bool and _int helpers handle libtmux's string-typed attributes defensively. They're reused consistently throughout session_dict, window_dict, and pane_dict. This is the right pattern for isolating upstream API quirks rather than scattering conversions throughout the code.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:07.391505Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:46.50637Z",
+  "closed_at": "2026-11-27T03:31:46.50637Z",
+  "close_reason": "Acknowledged as good patterns",
+  "labels": [
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.8",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:07.409089Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

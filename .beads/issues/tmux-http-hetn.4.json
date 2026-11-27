@@ -1,0 +1,29 @@
+{
+  "id": "tmux-http-hetn.4",
+  "title": "Use TypedDict for dict-returning helper functions",
+  "description": "session_dict(), window_dict(), and pane_dict() (lines 36-65) return plain dicts with fixed, predictable keys. Using TypedDict would:\n\n- Enable static type checking on dict access\n- Provide IDE autocomplete for consumers\n- Document the structure in code\n\nExample fix:\n\nclass SessionInfo(TypedDict):\n    name: str\n    id: str\n    created: int\n    attached: bool\n    windows: int\n\ndef session_dict(s: libtmux.Session) -\u003e SessionInfo:\n    ...",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:01.822764Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.091042Z",
+  "closed_at": "2026-11-27T03:31:42.091042Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "idiomatic-python",
+    "data-modeling",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.4",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:01.846144Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

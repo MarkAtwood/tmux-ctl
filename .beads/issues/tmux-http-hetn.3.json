@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.3",
+  "title": "pane_stream resolves the same pane twice",
+  "description": "Lines 294-300 and 279: The pane_stream endpoint calls resolve_pane(target) to validate the pane exists, then _stream_pane_output calls resolve_pane again on line 279. The validation result is discarded. Should pass the resolved pane object into the generator.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:13:59.282607Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.132041Z",
+  "closed_at": "2026-11-27T03:31:42.132041Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "efficiency",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.3",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:13:59.302037Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

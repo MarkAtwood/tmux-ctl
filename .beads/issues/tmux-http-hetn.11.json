@@ -1,0 +1,27 @@
+{
+  "id": "tmux-http-hetn.11",
+  "title": "GOOD: Self-documenting root endpoint",
+  "description": "Lines 137-158: The root endpoint returns a list of all endpoints with their HTTP methods and expected bodies. This is zero-overhead self-documentation that works with curl. Complements the OpenAPI spec at /docs for different use cases.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:11.97214Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:46.536963Z",
+  "closed_at": "2026-11-27T03:31:46.536963Z",
+  "close_reason": "Acknowledged as good patterns",
+  "labels": [
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.11",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:11.990068Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

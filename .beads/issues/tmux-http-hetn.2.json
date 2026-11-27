@@ -1,0 +1,29 @@
+{
+  "id": "tmux-http-hetn.2",
+  "title": "Add type annotations to public functions",
+  "description": "mypy --strict reports 50 type errors in server.py:\n\n- Helper functions _bool(v) and _int(v) lack parameter type annotations (lines 21, 27)\n- session_dict(s), window_dict(w), pane_dict(p) lack parameter types (lines 36, 46, 56)\n- get_session(), get_window(), resolve_pane() lack return type annotations (lines 68, 75, 83)\n- All route handlers lack return type annotations (lines 138, 162, etc.)\n- dict without type arguments at lines 36, 46, 56, 170, 209, 251\n\nConsider using libtmux type stubs or typing.Any for external library objects.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:13:58.51902Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.079671Z",
+  "closed_at": "2026-11-27T03:31:42.079671Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "idiomatic-python",
+    "type-hints",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.2",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:13:58.543562Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.12",
+  "title": "Negative lines parameter inverts capture direction",
+  "description": "Line 235: `pane.capture_pane(start=-lines)`. If `lines=-10`, then `start=10`, capturing from line 10 forward instead of the last N lines. The API accepts any int with no validation. Trigger: `GET /panes/%1/output?lines=-100`. Should reject negative values with 400 or clamp to 0.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:13.660703Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.04075Z",
+  "closed_at": "2026-11-27T03:31:42.04075Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "correctness",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.12",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:13.680387Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

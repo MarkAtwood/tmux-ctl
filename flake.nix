@@ -1,5 +1,5 @@
 {
-  description = "tmux HTTP server — REST API over tmux";
+  description = "tmux-ctl: REST API for tmux automation and AI agents";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -21,14 +21,14 @@
         };
 
         packages.default = pkgs.writeShellApplication {
-          name = "tmux-http";
+          name = "tmux-ctl";
           runtimeInputs = [ py pkgs.tmux ];
           text = ''exec python3 ${./server.py} "$@"'';
         };
 
         apps.default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/tmux-http";
+          program = "${self.packages.${system}.default}/bin/tmux-ctl";
         };
       });
 }

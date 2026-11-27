@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.5",
+  "title": "SSE delta computation logic is non-obvious",
+  "description": "Line 286: The expression `out[len(last_output):] if out.startswith(last_output) else out` handles delta computation, but the edge cases are implicit. What happens when the pane is cleared or lines scroll off? A short comment explaining 'send delta if output grew, otherwise send full' would make the behavior obvious on first read.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:01.967667Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.144115Z",
+  "closed_at": "2026-11-27T03:31:42.144115Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "readability",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.5",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:01.985196Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

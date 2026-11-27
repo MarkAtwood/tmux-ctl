@@ -1,0 +1,29 @@
+{
+  "id": "tmux-http-hetn.7",
+  "title": "Avoid blocking I/O in async streaming function",
+  "description": "_stream_pane_output() at lines 277-290 is an async generator but calls synchronous libtmux operations:\n\n- pane.capture_pane() on line 282 is a blocking call that shells out to tmux\n- This blocks the asyncio event loop during each poll cycle\n\nOptions:\n1. Run capture_pane() in a thread executor: await asyncio.to_thread(pane.capture_pane)\n2. Use run_in_executor explicitly for Python \u003c3.9 compatibility\n3. Document that the endpoint is not suitable for high-concurrency use\n\nThe issue only affects /panes/{target}/stream; other endpoints are sync and unaffected.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:05.848839Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.103298Z",
+  "closed_at": "2026-11-27T03:31:42.103298Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "idiomatic-python",
+    "async",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.7",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:05.868544Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

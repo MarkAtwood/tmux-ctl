@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.13",
+  "title": "window_create uses window_shell but sessions_create uses window_command",
+  "description": "Line 213 passes `window_shell=body.command` to `sess.new_window()`, but line 172 passes `window_command=body.command` to `server.new_session()`. The libtmux APIs differ: `new_session()` uses `window_command`, but `new_window()` may expect a different parameter. This inconsistency suggests one path is wrong - verify against libtmux docs which parameter is correct for each call.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:16.669172Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.053504Z",
+  "closed_at": "2026-11-27T03:31:42.053504Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "correctness",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.13",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:16.686454Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

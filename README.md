@@ -1,16 +1,12 @@
-# tmux-http
+# tmux-ctl
 
-A tiny REST API over your running tmux server. List sessions, read pane output,
-send keystrokes — all over HTTP. Built on [libtmux] + [FastAPI].
+REST API for tmux automation and AI agents. Full control over sessions, windows, 
+panes, plus terminal state access for screen scraping and TUI automation.
+
+Built on [libtmux] + [FastAPI].
 
 [libtmux]: https://github.com/tmux-python/libtmux
 [FastAPI]: https://fastapi.tiangolo.com/
-
-## Why
-
-Tmux has no built-in HTTP interface. If you want to drive tmux from a script,
-an agent, a webhook, or just `curl`, you either shell out to `tmux ...` or
-wrap the socket. This is the wrapper.
 
 ## Install & run
 
@@ -22,54 +18,73 @@ nix run . -- --host 0.0.0.0 --port 9000
 nix develop -c python3 server.py     # dev shell
 ```
 
-The server connects to your **default** tmux socket — the same one your
-running sessions live on. There is no separate tmux server.
+The server connects to your **default** tmux socket.
 
 ## API
 
-Once running, the OpenAPI spec is auto-generated:
+OpenAPI spec at `/openapi.json`, Swagger UI at `/docs`.
 
-- `GET /openapi.json` — machine-readable spec
-- `GET /docs` — Swagger UI
-- `GET /redoc` — ReDoc UI
-
-Endpoint summary:
+### Sessions, Windows, Panes
 
 | Method | Path | Description |
-|---|---|---|
-| GET | `/` | Endpoint index |
+|--------|------|-------------|
 | GET | `/sessions` | List all sessions |
-| POST | `/sessions` | Create a session — `{name, command?, width?, height?}` |
+| POST | `/sessions` | Create session `{name, command?, width?, height?}` |
 | GET | `/sessions/{name}` | Session detail with windows |
-| DELETE | `/sessions/{name}` | Kill the named session |
-| GET | `/sessions/{name}/windows` | List windows in a session |
-| GET | `/sessions/{name}/windows/{idx}/panes` | List panes in a window |
-| GET | `/panes/{target}/output?lines=N` | Capture last N lines from a pane |
-| POST | `/panes/{target}/input` | Send keys — `{keys, literal?, enter?}` |
+| DELETE | `/sessions/{name}` | Kill session |
+| POST | `/sessions/{name}/rename` | Rename `{new_name}` |
+| POST | `/sessions/{name}/windows` | Create window `{name?, command?}` |
+| GET | `/windows` | List all windows |
+| GET | `/windows/{target}` | Window detail with panes |
+| DELETE | `/windows/{target}` | Kill window |
+| POST | `/windows/{target}/split` | Split `{vertical?, command?, size?}` |
+| GET | `/panes` | List all panes |
+| GET | `/panes/{target}` | Pane detail |
+| DELETE | `/panes/{target}` | Kill pane |
+| POST | `/panes/{target}/split` | Split pane |
+| POST | `/panes/{target}/resize` | Resize `{width?, height?, adjust?, direction?}` |
 
-Pane targets accept either `%id` (e.g. `%14`) or `session:window.pane`
-(e.g. `main:0.1`).
+Targets: `@id` or `session:idx` for windows, `%id` or `session:window.pane` for panes.
 
-### Examples
+### Input & Output
 
-```sh
-curl -s localhost:8765/sessions | jq
-curl -s -X POST localhost:8765/sessions \
-  -H 'content-type: application/json' \
-  -d '{"name":"scratch"}'
-curl -s 'localhost:8765/panes/scratch:0.0/output?lines=50'
-curl -s -X POST localhost:8765/panes/scratch:0.0/input \
-  -H 'content-type: application/json' \
-  -d '{"keys":"echo hi","enter":true}'
-curl -s -X DELETE localhost:8765/sessions/scratch
-```
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/panes/{target}/output` | Capture text `?lines=N` |
+| POST | `/panes/{target}/input` | Send keys `{keys, literal?, enter?}` |
+| POST | `/panes/{target}/mouse` | Mouse event `{x, y, button, action}` |
+| POST | `/panes/{target}/capture` | Capture region `{start_line, end_line, start_col, end_col}` |
+| GET | `/panes/{target}/search` | Regex search `?pattern=X` |
+| POST | `/panes/{target}/wait` | Wait for pattern `{pattern, timeout, interval}` |
+
+### Terminal State (for TUI automation)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/panes/{target}/terminal` | Emulator state: modes, scroll region, tabs |
+| GET | `/panes/{target}/screen` | Full screen capture, `?colors=true` for ANSI |
+| GET | `/panes/{target}/grid` | Cell-level data: char, fg, bg, attrs |
+| GET | `/panes/{target}/lines` | Lines with flags (prompt/output markers) |
+| GET | `/panes/{target}/widgets` | Detect box-drawing UI regions (curses apps) |
+| GET | `/panes/{target}/prompt` | Detect shell prompt (teletype mode) |
+
+### Buffers, Clients, Options
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/buffers` | List paste buffers |
+| GET/POST/DELETE | `/buffers/{name}` | Buffer CRUD |
+| GET | `/clients` | List attached clients |
+| GET/PUT | `/sessions/{name}/options/{opt}` | Session options |
+| GET/PUT | `/windows/{target}/options/{opt}` | Window options |
+| GET/PUT | `/panes/{target}/options/{opt}` | Pane options |
+| GET/PUT/DELETE | `/sessions/{name}/env/{var}` | Session environment |
 
 ## Safety
 
-`DELETE /sessions/{name}` and `POST /panes/{target}/input` operate on your
-real tmux. Be deliberate about which sessions and panes you target — there is
-no undo. Bind to `127.0.0.1` (the default) unless you have a reason not to.
+Operations affect your real tmux sessions. Bind to `127.0.0.1` (default) unless
+you have a reason not to.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT

@@ -1,0 +1,28 @@
+{
+  "id": "tmux-http-hetn.10",
+  "title": "Falsy-zero bug: width=0, height=0, size=0 silently ignored",
+  "description": "Lines 270-273 (pane_resize), 173-176 (sessions_create), and 254-255 (pane_split) use `if body.width:` guards that treat 0 as falsy. If a caller passes width=0 or height=0, the value is silently dropped instead of being passed to libtmux. While unusual, 0 is a valid dimension request that should either be honored or explicitly rejected with a 400.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "owner": "me@mark.atwood.name",
+  "created_at": "2026-11-27T03:14:11.405972Z",
+  "created_by": "Mark Atwood",
+  "updated_at": "2026-11-27T03:31:42.024449Z",
+  "closed_at": "2026-11-27T03:31:42.024449Z",
+  "close_reason": "Fixed in server.py",
+  "labels": [
+    "correctness",
+    "review"
+  ],
+  "dependencies": [
+    {
+      "issue_id": "tmux-http-hetn.10",
+      "depends_on_id": "tmux-http-hetn",
+      "type": "parent-child",
+      "created_at": "2026-11-27T03:14:11.432467Z",
+      "created_by": "Mark Atwood",
+      "metadata": "{}"
+    }
+  ]
+}

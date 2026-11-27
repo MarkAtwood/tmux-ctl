@@ -1,7 +1,6 @@
 # Contributing
 
-Thanks for your interest. tmux-http is small on purpose; contributions that
-keep it that way are very welcome.
+Thanks for your interest in tmux-ctl.
 
 ## Dev environment
 
