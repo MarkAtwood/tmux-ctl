@@ -23,7 +23,7 @@
         packages.default = pkgs.writeShellApplication {
           name = "tmux-ctl";
           runtimeInputs = [ py pkgs.tmux ];
-          text = ''exec python3 ${./server.py} "$@"'';
+          text = ''exec python3 -m tmux_ctl "$@"'';
         };
 
         apps.default = {

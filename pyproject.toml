@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tmux-ctl"
+version = "0.1.0"
+description = "HTTP API for tmux automation and AI agents"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    {name = "Mark Atwood", email = "me@mark.atwood.name"},
+]
+keywords = ["tmux", "terminal", "automation", "api", "rest"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Shells",
+    "Topic :: Terminals :: Terminal Emulators/X Terminals",
+]
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "libtmux>=0.30.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/MarkAtwood/tmux-ctl"
+Repository = "https://github.com/MarkAtwood/tmux-ctl"
+Issues = "https://github.com/MarkAtwood/tmux-ctl/issues"
+
+[project.scripts]
+tmux-ctl = "tmux_ctl:main"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["tmux_ctl.py"]
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "tmux_ctl.py",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
