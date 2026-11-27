@@ -6,13 +6,13 @@ HTTP API for tmux. Control sessions, windows, panes. Read terminal state.
 
 ```sh
 # PyPI
-pip install tmux-ctl
+pip install tmux-api
 
 # pipx (isolated)
-pipx install tmux-ctl
+pipx install tmux-api
 
 # Homebrew
-brew install MarkAtwood/tap/tmux-ctl
+brew install MarkAtwood/tap/tmux-api
 
 # Nix
 nix run github:MarkAtwood/tmux-ctl
@@ -23,9 +23,9 @@ Requires tmux to be installed.
 ## Run
 
 ```sh
-tmux-ctl                    # 127.0.0.1:8765
-tmux-ctl --port 9000        # custom port
-tmux-ctl --host 0.0.0.0     # listen on all interfaces
+tmux-api                    # 127.0.0.1:8765
+tmux-api --port 9000        # custom port
+tmux-api --host 0.0.0.0     # listen on all interfaces
 ```
 
 Connects to your default tmux socket.
