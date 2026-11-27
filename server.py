@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
+import json
 from typing import Optional
 
 import libtmux
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 
@@ -150,6 +153,7 @@ def root():
             "POST   /panes/{target}/split   {vertical?, command?, size?}",
             "DELETE /panes/{target}",
             "POST   /panes/{target}/resize  {width?, height?}",
+            "GET    /panes/{target}/stream?poll_ms=100  (SSE)",
         ],
     }
 
@@ -268,6 +272,32 @@ def pane_resize(target: str, body: ResizePane):
     if body.height:
         pane.resize(height=body.height)
     return pane_dict(pane)
+
+
+async def _stream_pane_output(target: str, poll_ms: int = 100):
+    """Generator that yields SSE events when pane output changes."""
+    pane = resolve_pane(target)
+    last_output = ""
+    while True:
+        out = pane.capture_pane()
+        if isinstance(out, list):
+            out = "\n".join(out)
+        if out != last_output:
+            new_content = out[len(last_output):] if out.startswith(last_output) else out
+            event = {"type": "output", "content": new_content}
+            yield f"data: {json.dumps(event)}\n\n"
+            last_output = out
+        await asyncio.sleep(poll_ms / 1000)
+
+
+@app.get("/panes/{target}/stream")
+async def pane_stream(target: str, poll_ms: int = 100):
+    resolve_pane(target)
+    return StreamingResponse(
+        _stream_pane_output(target, poll_ms),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 def main():

@@ -52,6 +52,7 @@ Endpoint summary:
 | POST | `/panes/{target}/split` | Split pane — `{vertical?, command?, size?}` |
 | DELETE | `/panes/{target}` | Kill a pane |
 | POST | `/panes/{target}/resize` | Resize pane — `{width?, height?}` |
+| GET | `/panes/{target}/stream?poll_ms=100` | Stream output changes via SSE |
 
 Pane targets accept either `%id` (e.g. `%14`) or `session:window.pane`
 (e.g. `main:0.1`).
